@@ -15,6 +15,9 @@ import { Route as CriarContaRouteImport } from './routes/criar-conta'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as PainelRouteImport } from './routes/painel'
 import { Route as SouProfissionalRouteImport } from './routes/sou-profissional'
+import { Route as ApiUploadRouteImport } from './routes/api/upload'
+import { Route as EditarPetPetIdRouteImport } from './routes/editar-pet/$petId'
+import { Route as ApiImgKeyRouteImport } from './routes/api/img/$key'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -46,6 +49,21 @@ const SouProfissionalRoute = SouProfissionalRouteImport.update({
   path: '/sou-profissional',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiUploadRoute = ApiUploadRouteImport.update({
+  id: '/api/upload',
+  path: '/api/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EditarPetPetIdRoute = EditarPetPetIdRouteImport.update({
+  id: '/editar-pet/$petId',
+  path: '/editar-pet/$petId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiImgKeyRoute = ApiImgKeyRouteImport.update({
+  id: '/api/img/$key',
+  path: '/api/img/$key',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -54,6 +72,9 @@ export interface FileRoutesByFullPath {
   '/entrar': typeof EntrarRoute
   '/painel': typeof PainelRoute
   '/sou-profissional': typeof SouProfissionalRoute
+  '/api/upload': typeof ApiUploadRoute
+  '/editar-pet/$petId': typeof EditarPetPetIdRoute
+  '/api/img/$key': typeof ApiImgKeyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +83,9 @@ export interface FileRoutesByTo {
   '/entrar': typeof EntrarRoute
   '/painel': typeof PainelRoute
   '/sou-profissional': typeof SouProfissionalRoute
+  '/api/upload': typeof ApiUploadRoute
+  '/editar-pet/$petId': typeof EditarPetPetIdRoute
+  '/api/img/$key': typeof ApiImgKeyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,6 +95,9 @@ export interface FileRoutesById {
   '/entrar': typeof EntrarRoute
   '/painel': typeof PainelRoute
   '/sou-profissional': typeof SouProfissionalRoute
+  '/api/upload': typeof ApiUploadRoute
+  '/editar-pet/$petId': typeof EditarPetPetIdRoute
+  '/api/img/$key': typeof ApiImgKeyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -81,6 +108,9 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/painel'
     | '/sou-profissional'
+    | '/api/upload'
+    | '/editar-pet/$petId'
+    | '/api/img/$key'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -89,6 +119,9 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/painel'
     | '/sou-profissional'
+    | '/api/upload'
+    | '/editar-pet/$petId'
+    | '/api/img/$key'
   id:
     | '__root__'
     | '/'
@@ -97,6 +130,9 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/painel'
     | '/sou-profissional'
+    | '/api/upload'
+    | '/editar-pet/$petId'
+    | '/api/img/$key'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -106,6 +142,9 @@ export interface RootRouteChildren {
   EntrarRoute: typeof EntrarRoute
   PainelRoute: typeof PainelRoute
   SouProfissionalRoute: typeof SouProfissionalRoute
+  ApiUploadRoute: typeof ApiUploadRoute
+  EditarPetPetIdRoute: typeof EditarPetPetIdRoute
+  ApiImgKeyRoute: typeof ApiImgKeyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -152,6 +191,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SouProfissionalRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/upload': {
+      id: '/api/upload'
+      path: '/api/upload'
+      fullPath: '/api/upload'
+      preLoaderRoute: typeof ApiUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/editar-pet/$petId': {
+      id: '/editar-pet/$petId'
+      path: '/editar-pet/$petId'
+      fullPath: '/editar-pet/$petId'
+      preLoaderRoute: typeof EditarPetPetIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/img/$key': {
+      id: '/api/img/$key'
+      path: '/api/img/$key'
+      fullPath: '/api/img/$key'
+      preLoaderRoute: typeof ApiImgKeyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -162,6 +222,9 @@ const rootRouteChildren: RootRouteChildren = {
   EntrarRoute: EntrarRoute,
   PainelRoute: PainelRoute,
   SouProfissionalRoute: SouProfissionalRoute,
+  ApiUploadRoute: ApiUploadRoute,
+  EditarPetPetIdRoute: EditarPetPetIdRoute,
+  ApiImgKeyRoute: ApiImgKeyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

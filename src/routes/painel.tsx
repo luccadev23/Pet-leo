@@ -69,13 +69,20 @@ function Painel() {
               {data.pets.map((pet) => (
                 <Card key={pet.id} className="p-5">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-petlio-teal-50 text-petlio-teal-600">
-                      <PawPrint className="h-6 w-6" />
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-petlio-teal-50 text-petlio-teal-600">
+                      {pet.photoUrl ? (
+                        <img src={`/api/img/${pet.photoUrl}`} alt={pet.name} className="h-full w-full object-cover" />
+                      ) : (
+                        <PawPrint className="h-6 w-6" />
+                      )}
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <div className="font-semibold text-petlio-navy">{pet.name}</div>
                       <div className="text-xs text-petlio-navy/55">{pet.species}{pet.breed ? ` · ${pet.breed}` : ''}</div>
                     </div>
+                    <Link to="/editar-pet/$petId" params={{ petId: pet.id }}>
+                      <Button variant="ghost" size="sm">Editar</Button>
+                    </Link>
                   </div>
                   {pet.notes && <p className="mt-3 text-xs text-petlio-navy/60">{pet.notes}</p>}
                 </Card>
@@ -90,10 +97,14 @@ function Painel() {
           {data.providerProfile ? (
             <Card className="mt-4 p-6">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-petlio-gold/20 text-petlio-gold-dark">
-                  <Stethoscope className="h-6 w-6" />
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-petlio-gold/20 text-petlio-gold-dark">
+                  {data.user.avatarUrl ? (
+                    <img src={`/api/img/${data.user.avatarUrl}`} alt={data.user.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <Stethoscope className="h-6 w-6" />
+                  )}
                 </div>
-                <div>
+                <div className="flex-1">
                   <div className="font-semibold text-petlio-navy">
                     {categoryLabels[data.providerProfile.category] ?? data.providerProfile.category}
                   </div>
@@ -101,6 +112,9 @@ function Painel() {
                     ⭐ {data.providerProfile.ratingAvg ?? 0} · {data.providerProfile.ratingCount ?? 0} avaliações
                   </div>
                 </div>
+                <Link to="/sou-profissional">
+                  <Button variant="ghost" size="sm">Editar</Button>
+                </Link>
               </div>
               {data.providerProfile.bio && <p className="mt-3 text-sm text-petlio-navy/70">{data.providerProfile.bio}</p>}
             </Card>

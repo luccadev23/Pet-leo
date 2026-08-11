@@ -100,6 +100,7 @@ export const createPet = createServerFn({ method: 'POST' })
       weightKg?: number
       notes?: string
       allergies?: string
+      photoKey?: string
     }) => d
   )
   .handler(async ({ data }) => {
@@ -119,8 +120,58 @@ export const createPet = createServerFn({ method: 'POST' })
       weightKg: data.weightKg ?? null,
       notes: data.notes?.trim() || null,
       allergies: data.allergies?.trim() || null,
+      photoUrl: data.photoKey || null,
     })
     return { id }
+  })
+
+export const getPet = createServerFn({ method: 'GET' })
+  .validator((d: { id: string }) => d)
+  .handler(async ({ data }) => {
+    const user = await getCurrentUserRow()
+    if (!user) throw new Error('Você precisa entrar na sua conta primeiro.')
+    const rows = await db().select().from(pets).where(eq(pets.id, data.id))
+    const pet = rows[0]
+    if (!pet || pet.ownerId !== user.id) throw new Error('Pet não encontrado.')
+    return pet
+  })
+
+export const updatePet = createServerFn({ method: 'POST' })
+  .validator(
+    (d: {
+      id: string
+      name: string
+      species: string
+      breed?: string
+      sex?: 'MALE' | 'FEMALE' | 'UNKNOWN'
+      weightKg?: number
+      notes?: string
+      allergies?: string
+      photoKey?: string | null
+    }) => d
+  )
+  .handler(async ({ data }) => {
+    const user = await getCurrentUserRow()
+    if (!user) throw new Error('Você precisa entrar na sua conta primeiro.')
+    const rows = await db().select().from(pets).where(eq(pets.id, data.id))
+    const pet = rows[0]
+    if (!pet || pet.ownerId !== user.id) throw new Error('Pet não encontrado.')
+
+    await db()
+      .update(pets)
+      .set({
+        name: data.name.trim(),
+        species: data.species.trim(),
+        breed: data.breed?.trim() || null,
+        sex: data.sex ?? 'UNKNOWN',
+        weightKg: data.weightKg ?? null,
+        notes: data.notes?.trim() || null,
+        allergies: data.allergies?.trim() || null,
+        photoUrl: data.photoKey === undefined ? pet.photoUrl : data.photoKey,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(pets.id, data.id))
+    return { id: data.id }
   })
 
 export const getMyPets = createServerFn({ method: 'GET' }).handler(async () => {
@@ -136,6 +187,7 @@ export const becomeProvider = createServerFn({ method: 'POST' })
     (d: {
       category: 'VETERINARIO' | 'PASSEADOR' | 'PET_SITTER' | 'TRANSPORTE' | 'PET_SHOP' | 'CLINICA'
       bio?: string
+      photoKey?: string
     }) => d
   )
   .handler(async ({ data }) => {
@@ -155,8 +207,45 @@ export const becomeProvider = createServerFn({ method: 'POST' })
       category: data.category,
       bio: data.bio?.trim() || null,
     })
-    await db().update(users).set({ role: 'PROVIDER' }).where(eq(users.id, user.id))
+    await db()
+      .update(users)
+      .set({ role: 'PROVIDER', avatarUrl: data.photoKey || user.avatarUrl })
+      .where(eq(users.id, user.id))
     return { id }
+  })
+
+export const updateProviderProfile = createServerFn({ method: 'POST' })
+  .validator(
+    (d: {
+      category: 'VETERINARIO' | 'PASSEADOR' | 'PET_SITTER' | 'TRANSPORTE' | 'PET_SHOP' | 'CLINICA'
+      bio?: string
+      photoKey?: string | null
+    }) => d
+  )
+  .handler(async ({ data }) => {
+    const user = await getCurrentUserRow()
+    if (!user) throw new Error('Você precisa entrar na sua conta primeiro.')
+
+    const rows = await db().select().from(providerProfiles).where(eq(providerProfiles.userId, user.id))
+    const profile = rows[0]
+    if (!profile) throw new Error('Perfil profissional não encontrado.')
+
+    await db()
+      .update(providerProfiles)
+      .set({
+        category: data.category,
+        bio: data.bio?.trim() || null,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(providerProfiles.id, profile.id))
+
+    if (data.photoKey !== undefined) {
+      await db()
+        .update(users)
+        .set({ avatarUrl: data.photoKey })
+        .where(eq(users.id, user.id))
+    }
+    return { id: profile.id }
   })
 
 // ---------------- DASHBOARD ----------------
@@ -178,7 +267,7 @@ export const getDashboardData = createServerFn({ method: 'GET' }).handler(async 
   }
 
   return {
-    user: { id: user.id, name: user.name, email: user.email, role: user.role },
+    user: { id: user.id, name: user.name, email: user.email, role: user.role, avatarUrl: user.avatarUrl },
     pets: myPets,
     providerProfile,
     services: myServices,
