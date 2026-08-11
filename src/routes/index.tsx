@@ -70,8 +70,12 @@ function Home() {
           <div className="flex items-center gap-3">
             {user ? (
               <Link to="/painel" className="flex items-center gap-2 rounded-full py-1 pl-1 pr-3 hover:bg-petlio-teal-50">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-petlio-teal-600 text-xs font-bold text-petlio-cream">
-                  {user.name.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()}
+                <span className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-petlio-teal-600 text-xs font-bold text-petlio-cream">
+                  {user.avatarUrl ? (
+                    <img src={`/api/img/${user.avatarUrl}`} alt={user.name} className="h-full w-full object-cover" />
+                  ) : (
+                    user.name.split(' ').map((p) => p[0]).slice(0, 2).join('').toUpperCase()
+                  )}
                 </span>
                 <span className="hidden text-sm font-medium text-petlio-navy sm:inline">{user.name.split(' ')[0]}</span>
               </Link>

@@ -4,7 +4,7 @@ import { PawPrint } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { Card } from '~/components/ui/card'
 import { Input, Label } from '~/components/ui/form'
-import { signUp } from '~/server/functions'
+import { authClient } from '~/lib/auth-client'
 
 export const Route = createFileRoute('/criar-conta')({
   component: CriarConta,
@@ -22,14 +22,13 @@ function CriarConta() {
     e.preventDefault()
     setError(null)
     setLoading(true)
-    try {
-      await signUp({ data: { name, email, password } })
-      navigate({ to: '/painel' })
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Não foi possível criar sua conta.')
-    } finally {
-      setLoading(false)
+    const { error: authError } = await authClient.signUp.email({ name, email, password })
+    setLoading(false)
+    if (authError) {
+      setError(authError.message ?? 'Não foi possível criar sua conta.')
+      return
     }
+    navigate({ to: '/painel' })
   }
 
   return (

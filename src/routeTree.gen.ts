@@ -17,6 +17,7 @@ import { Route as PainelRouteImport } from './routes/painel'
 import { Route as SouProfissionalRouteImport } from './routes/sou-profissional'
 import { Route as ApiUploadRouteImport } from './routes/api/upload'
 import { Route as EditarPetPetIdRouteImport } from './routes/editar-pet/$petId'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiImgKeyRouteImport } from './routes/api/img/$key'
 
 const IndexRoute = IndexRouteImport.update({
@@ -59,6 +60,11 @@ const EditarPetPetIdRoute = EditarPetPetIdRouteImport.update({
   path: '/editar-pet/$petId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiImgKeyRoute = ApiImgKeyRouteImport.update({
   id: '/api/img/$key',
   path: '/api/img/$key',
@@ -74,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/sou-profissional': typeof SouProfissionalRoute
   '/api/upload': typeof ApiUploadRoute
   '/editar-pet/$petId': typeof EditarPetPetIdRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/img/$key': typeof ApiImgKeyRoute
 }
 export interface FileRoutesByTo {
@@ -85,6 +92,7 @@ export interface FileRoutesByTo {
   '/sou-profissional': typeof SouProfissionalRoute
   '/api/upload': typeof ApiUploadRoute
   '/editar-pet/$petId': typeof EditarPetPetIdRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/img/$key': typeof ApiImgKeyRoute
 }
 export interface FileRoutesById {
@@ -97,6 +105,7 @@ export interface FileRoutesById {
   '/sou-profissional': typeof SouProfissionalRoute
   '/api/upload': typeof ApiUploadRoute
   '/editar-pet/$petId': typeof EditarPetPetIdRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/img/$key': typeof ApiImgKeyRoute
 }
 export interface FileRouteTypes {
@@ -110,6 +119,7 @@ export interface FileRouteTypes {
     | '/sou-profissional'
     | '/api/upload'
     | '/editar-pet/$petId'
+    | '/api/auth/$'
     | '/api/img/$key'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -121,6 +131,7 @@ export interface FileRouteTypes {
     | '/sou-profissional'
     | '/api/upload'
     | '/editar-pet/$petId'
+    | '/api/auth/$'
     | '/api/img/$key'
   id:
     | '__root__'
@@ -132,6 +143,7 @@ export interface FileRouteTypes {
     | '/sou-profissional'
     | '/api/upload'
     | '/editar-pet/$petId'
+    | '/api/auth/$'
     | '/api/img/$key'
   fileRoutesById: FileRoutesById
 }
@@ -144,6 +156,7 @@ export interface RootRouteChildren {
   SouProfissionalRoute: typeof SouProfissionalRoute
   ApiUploadRoute: typeof ApiUploadRoute
   EditarPetPetIdRoute: typeof EditarPetPetIdRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiImgKeyRoute: typeof ApiImgKeyRoute
 }
 
@@ -205,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EditarPetPetIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/img/$key': {
       id: '/api/img/$key'
       path: '/api/img/$key'
@@ -224,6 +244,7 @@ const rootRouteChildren: RootRouteChildren = {
   SouProfissionalRoute: SouProfissionalRoute,
   ApiUploadRoute: ApiUploadRoute,
   EditarPetPetIdRoute: EditarPetPetIdRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiImgKeyRoute: ApiImgKeyRoute,
 }
 export const routeTree = rootRouteImport

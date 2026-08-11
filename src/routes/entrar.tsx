@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { Card } from '~/components/ui/card'
 import { Input, Label } from '~/components/ui/form'
-import { logIn } from '~/server/functions'
+import { authClient } from '~/lib/auth-client'
 
 export const Route = createFileRoute('/entrar')({
   component: Entrar,
@@ -20,14 +20,13 @@ function Entrar() {
     e.preventDefault()
     setError(null)
     setLoading(true)
-    try {
-      await logIn({ data: { email, password } })
-      navigate({ to: '/painel' })
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Não foi possível entrar.')
-    } finally {
-      setLoading(false)
+    const { error: authError } = await authClient.signIn.email({ email, password })
+    setLoading(false)
+    if (authError) {
+      setError('E-mail ou senha incorretos.')
+      return
     }
+    navigate({ to: '/painel' })
   }
 
   return (

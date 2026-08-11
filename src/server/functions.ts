@@ -1,92 +1,26 @@
 import { createServerFn } from '@tanstack/react-start'
-import { getCookie, setCookie, deleteCookie } from '@tanstack/react-start/server'
+import { getRequest } from '@tanstack/react-start/server'
 import { drizzle } from 'drizzle-orm/d1'
 import { eq } from 'drizzle-orm'
 import { env } from 'cloudflare:workers'
-import { users, pets, providerProfiles, sessions, services } from '~/db/schema'
-import { hashPassword, verifyPassword } from '~/lib/auth'
-
-const SESSION_COOKIE = 'petlio_session'
+import { user, pets, providerProfiles, services } from '~/db/schema'
+import { getAuth } from '~/lib/auth-server'
 
 function db() {
   return drizzle(env.DB as D1Database)
 }
 
-async function createSessionCookie(userId: string) {
-  const token = crypto.randomUUID()
-  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-  await db().insert(sessions).values({ id: token, userId, expiresAt })
-  setCookie(SESSION_COOKIE, token, {
-    httpOnly: true,
-    path: '/',
-    maxAge: 60 * 60 * 24 * 30,
-    sameSite: 'lax',
-    secure: true,
-  })
-}
-
 async function getCurrentUserRow() {
-  const token = getCookie(SESSION_COOKIE)
-  if (!token) return null
-  const sessionRows = await db().select().from(sessions).where(eq(sessions.id, token))
-  const session = sessionRows[0]
-  if (!session || new Date(session.expiresAt) < new Date()) return null
-  const userRows = await db().select().from(users).where(eq(users.id, session.userId))
-  return userRows[0] ?? null
+  const request = getRequest()
+  const session = await getAuth().api.getSession({ headers: request.headers })
+  if (!session) return null
+  return session.user as typeof user.$inferSelect
 }
-
-// ---------------- AUTH ----------------
-
-export const signUp = createServerFn({ method: 'POST' })
-  .validator((d: { name: string; email: string; password: string }) => d)
-  .handler(async ({ data }) => {
-    const email = data.email.trim().toLowerCase()
-    if (!data.name.trim()) throw new Error('Informe seu nome.')
-    if (!email.includes('@')) throw new Error('E-mail inválido.')
-    if (data.password.length < 6) throw new Error('A senha precisa ter pelo menos 6 caracteres.')
-
-    const existing = await db().select().from(users).where(eq(users.email, email))
-    if (existing[0]) throw new Error('Já existe uma conta com esse e-mail.')
-
-    const passwordHash = await hashPassword(data.password)
-    const id = crypto.randomUUID()
-    await db().insert(users).values({
-      id,
-      name: data.name.trim(),
-      email,
-      passwordHash,
-      role: 'CLIENT',
-    })
-    await createSessionCookie(id)
-    return { id, name: data.name.trim(), role: 'CLIENT' as const }
-  })
-
-export const logIn = createServerFn({ method: 'POST' })
-  .validator((d: { email: string; password: string }) => d)
-  .handler(async ({ data }) => {
-    const email = data.email.trim().toLowerCase()
-    const rows = await db().select().from(users).where(eq(users.email, email))
-    const user = rows[0]
-    if (!user) throw new Error('E-mail ou senha incorretos.')
-    const ok = await verifyPassword(data.password, user.passwordHash)
-    if (!ok) throw new Error('E-mail ou senha incorretos.')
-    await createSessionCookie(user.id)
-    return { id: user.id, name: user.name, role: user.role }
-  })
-
-export const logOut = createServerFn({ method: 'POST' }).handler(async () => {
-  const token = getCookie(SESSION_COOKIE)
-  if (token) {
-    await db().delete(sessions).where(eq(sessions.id, token))
-  }
-  deleteCookie(SESSION_COOKIE, { path: '/' })
-  return { ok: true }
-})
 
 export const getSessionUser = createServerFn({ method: 'GET' }).handler(async () => {
-  const user = await getCurrentUserRow()
-  if (!user) return null
-  return { id: user.id, name: user.name, email: user.email, role: user.role }
+  const u = await getCurrentUserRow()
+  if (!u) return null
+  return { id: u.id, name: u.name, email: u.email, role: u.role, avatarUrl: u.avatarUrl }
 })
 
 // ---------------- PETS ----------------
@@ -105,15 +39,15 @@ export const createPet = createServerFn({ method: 'POST' })
     }) => d
   )
   .handler(async ({ data }) => {
-    const user = await getCurrentUserRow()
-    if (!user) throw new Error('Você precisa entrar na sua conta primeiro.')
+    const u = await getCurrentUserRow()
+    if (!u) throw new Error('Você precisa entrar na sua conta primeiro.')
     if (!data.name.trim()) throw new Error('Dê um nome para o seu pet.')
     if (!data.species.trim()) throw new Error('Informe a espécie do pet.')
 
     const id = crypto.randomUUID()
     await db().insert(pets).values({
       id,
-      ownerId: user.id,
+      ownerId: u.id,
       name: data.name.trim(),
       species: data.species.trim(),
       breed: data.breed?.trim() || null,
@@ -129,11 +63,11 @@ export const createPet = createServerFn({ method: 'POST' })
 export const getPet = createServerFn({ method: 'GET' })
   .validator((d: { id: string }) => d)
   .handler(async ({ data }) => {
-    const user = await getCurrentUserRow()
-    if (!user) throw new Error('Você precisa entrar na sua conta primeiro.')
+    const u = await getCurrentUserRow()
+    if (!u) throw new Error('Você precisa entrar na sua conta primeiro.')
     const rows = await db().select().from(pets).where(eq(pets.id, data.id))
     const pet = rows[0]
-    if (!pet || pet.ownerId !== user.id) throw new Error('Pet não encontrado.')
+    if (!pet || pet.ownerId !== u.id) throw new Error('Pet não encontrado.')
     return pet
   })
 
@@ -152,11 +86,11 @@ export const updatePet = createServerFn({ method: 'POST' })
     }) => d
   )
   .handler(async ({ data }) => {
-    const user = await getCurrentUserRow()
-    if (!user) throw new Error('Você precisa entrar na sua conta primeiro.')
+    const u = await getCurrentUserRow()
+    if (!u) throw new Error('Você precisa entrar na sua conta primeiro.')
     const rows = await db().select().from(pets).where(eq(pets.id, data.id))
     const pet = rows[0]
-    if (!pet || pet.ownerId !== user.id) throw new Error('Pet não encontrado.')
+    if (!pet || pet.ownerId !== u.id) throw new Error('Pet não encontrado.')
 
     await db()
       .update(pets)
@@ -176,9 +110,9 @@ export const updatePet = createServerFn({ method: 'POST' })
   })
 
 export const getMyPets = createServerFn({ method: 'GET' }).handler(async () => {
-  const user = await getCurrentUserRow()
-  if (!user) return []
-  return db().select().from(pets).where(eq(pets.ownerId, user.id))
+  const u = await getCurrentUserRow()
+  if (!u) return []
+  return db().select().from(pets).where(eq(pets.ownerId, u.id))
 })
 
 // ---------------- PROVIDERS ----------------
@@ -192,26 +126,23 @@ export const becomeProvider = createServerFn({ method: 'POST' })
     }) => d
   )
   .handler(async ({ data }) => {
-    const user = await getCurrentUserRow()
-    if (!user) throw new Error('Você precisa entrar na sua conta primeiro.')
+    const u = await getCurrentUserRow()
+    if (!u) throw new Error('Você precisa entrar na sua conta primeiro.')
 
-    const existing = await db()
-      .select()
-      .from(providerProfiles)
-      .where(eq(providerProfiles.userId, user.id))
+    const existing = await db().select().from(providerProfiles).where(eq(providerProfiles.userId, u.id))
     if (existing[0]) throw new Error('Você já tem um perfil de profissional.')
 
     const id = crypto.randomUUID()
     await db().insert(providerProfiles).values({
       id,
-      userId: user.id,
+      userId: u.id,
       category: data.category,
       bio: data.bio?.trim() || null,
     })
     await db()
-      .update(users)
-      .set({ role: 'PROVIDER', avatarUrl: data.photoKey || user.avatarUrl })
-      .where(eq(users.id, user.id))
+      .update(user)
+      .set({ role: 'PROVIDER', avatarUrl: data.photoKey || u.avatarUrl })
+      .where(eq(user.id, u.id))
     return { id }
   })
 
@@ -224,10 +155,10 @@ export const updateProviderProfile = createServerFn({ method: 'POST' })
     }) => d
   )
   .handler(async ({ data }) => {
-    const user = await getCurrentUserRow()
-    if (!user) throw new Error('Você precisa entrar na sua conta primeiro.')
+    const u = await getCurrentUserRow()
+    if (!u) throw new Error('Você precisa entrar na sua conta primeiro.')
 
-    const rows = await db().select().from(providerProfiles).where(eq(providerProfiles.userId, user.id))
+    const rows = await db().select().from(providerProfiles).where(eq(providerProfiles.userId, u.id))
     const profile = rows[0]
     if (!profile) throw new Error('Perfil profissional não encontrado.')
 
@@ -241,10 +172,7 @@ export const updateProviderProfile = createServerFn({ method: 'POST' })
       .where(eq(providerProfiles.id, profile.id))
 
     if (data.photoKey !== undefined) {
-      await db()
-        .update(users)
-        .set({ avatarUrl: data.photoKey })
-        .where(eq(users.id, user.id))
+      await db().update(user).set({ avatarUrl: data.photoKey }).where(eq(user.id, u.id))
     }
     return { id: profile.id }
   })
@@ -252,15 +180,15 @@ export const updateProviderProfile = createServerFn({ method: 'POST' })
 // ---------------- DASHBOARD ----------------
 
 export const getDashboardData = createServerFn({ method: 'GET' }).handler(async () => {
-  const user = await getCurrentUserRow()
-  if (!user) return null
+  const u = await getCurrentUserRow()
+  if (!u) return null
 
-  const myPets = await db().select().from(pets).where(eq(pets.ownerId, user.id))
+  const myPets = await db().select().from(pets).where(eq(pets.ownerId, u.id))
 
   let providerProfile: typeof providerProfiles.$inferSelect | null = null
   let myServices: (typeof services.$inferSelect)[] = []
-  if (user.role === 'PROVIDER') {
-    const rows = await db().select().from(providerProfiles).where(eq(providerProfiles.userId, user.id))
+  if (u.role === 'PROVIDER') {
+    const rows = await db().select().from(providerProfiles).where(eq(providerProfiles.userId, u.id))
     providerProfile = rows[0] ?? null
     if (providerProfile) {
       myServices = await db().select().from(services).where(eq(services.providerId, providerProfile.id))
@@ -268,7 +196,7 @@ export const getDashboardData = createServerFn({ method: 'GET' }).handler(async 
   }
 
   return {
-    user: { id: user.id, name: user.name, email: user.email, role: user.role, avatarUrl: user.avatarUrl },
+    user: { id: u.id, name: u.name, email: u.email, role: u.role, avatarUrl: u.avatarUrl },
     pets: myPets,
     providerProfile,
     services: myServices,

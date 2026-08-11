@@ -2,7 +2,8 @@ import { createFileRoute, Link, redirect, useNavigate } from '@tanstack/react-ro
 import { PawPrint, Plus, LogOut, Stethoscope } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { Card } from '~/components/ui/card'
-import { getDashboardData, logOut } from '~/server/functions'
+import { getDashboardData } from '~/server/functions'
+import { authClient } from '~/lib/auth-client'
 
 export const Route = createFileRoute('/painel')({
   loader: async () => {
@@ -27,7 +28,7 @@ function Painel() {
   const navigate = useNavigate()
 
   async function handleLogout() {
-    await logOut()
+    await authClient.signOut()
     navigate({ to: '/' })
   }
 
