@@ -21,6 +21,7 @@ async function createSessionCookie(userId: string) {
     path: '/',
     maxAge: 60 * 60 * 24 * 30,
     sameSite: 'lax',
+    secure: true,
   })
 }
 
