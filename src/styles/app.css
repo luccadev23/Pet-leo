@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+  /* ---- Petlio brand palette, derived from the logo ---- */
+  --color-petlio-cream: #FBF7EF;      /* warm background, echoes the pearly logo backdrop */
+  --color-petlio-cream-dark: #F2EBDA;
+  --color-petlio-teal-50: #EAF4F3;
+  --color-petlio-teal-200: #A9D3D2;
+  --color-petlio-teal: #2E8C93;       /* mid ring of the paw badge */
+  --color-petlio-teal-600: #1B6B7A;
+  --color-petlio-navy: #0D3B4A;       /* deep petrol blue, wordmark */
+  --color-petlio-navy-900: #082733;
+  --color-petlio-gold: #E0A94E;       /* dog-house / paw icon gold */
+  --color-petlio-gold-dark: #C58A2E;
+  --color-petlio-coral: #D97757;      /* small warm accent, used sparingly */
+  --color-petlio-ink: #12242A;
+
+  --font-display: "Fraunces", "ui-serif", "Georgia", serif;
+  --font-body: "Inter", "ui-sans-serif", "system-ui", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: var(--color-petlio-cream);
+    color: var(--color-petlio-ink);
+    font-family: var(--font-body);
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-petlio-teal-600);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+.paw-divider {
+  background-image: radial-gradient(circle, var(--color-petlio-teal-200) 1.5px, transparent 1.5px);
+  background-size: 14px 14px;
+}
+
+.texture-noise {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+}
