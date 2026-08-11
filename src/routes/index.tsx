@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import {
   PawPrint, Stethoscope, Home as HomeIcon, Car, Scissors, ShoppingBag,
   Search, CalendarCheck, MessageCircle, Star, MapPin, ShieldCheck,
@@ -65,8 +65,8 @@ function Home() {
             <a href="#como-funciona" className="hover:text-petlio-navy">Como funciona</a>
           </nav>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm">Entrar</Button>
-            <Button variant="default" size="sm">Criar conta</Button>
+            <Link to="/entrar"><Button variant="ghost" size="sm">Entrar</Button></Link>
+            <Link to="/criar-conta"><Button variant="default" size="sm">Criar conta</Button></Link>
           </div>
         </div>
       </header>
@@ -86,8 +86,8 @@ function Home() {
               busque, converse e agende com profissionais avaliados perto de você.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button size="lg" variant="gold">Cadastrar meu pet</Button>
-              <Button size="lg" variant="outline">Sou profissional</Button>
+              <Link to="/cadastrar-pet"><Button size="lg" variant="gold" className="w-full sm:w-auto">Cadastrar meu pet</Button></Link>
+              <Link to="/sou-profissional"><Button size="lg" variant="outline" className="w-full sm:w-auto">Sou profissional</Button></Link>
             </div>
             <div className="mt-10 flex items-center gap-6 text-sm text-petlio-navy/60">
               <div className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-petlio-teal-600" /> Profissionais verificados</div>

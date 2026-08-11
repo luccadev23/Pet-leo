@@ -10,33 +10,102 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CadastrarPetRouteImport } from './routes/cadastrar-pet'
+import { Route as CriarContaRouteImport } from './routes/criar-conta'
+import { Route as EntrarRouteImport } from './routes/entrar'
+import { Route as PainelRouteImport } from './routes/painel'
+import { Route as SouProfissionalRouteImport } from './routes/sou-profissional'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CadastrarPetRoute = CadastrarPetRouteImport.update({
+  id: '/cadastrar-pet',
+  path: '/cadastrar-pet',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CriarContaRoute = CriarContaRouteImport.update({
+  id: '/criar-conta',
+  path: '/criar-conta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EntrarRoute = EntrarRouteImport.update({
+  id: '/entrar',
+  path: '/entrar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PainelRoute = PainelRouteImport.update({
+  id: '/painel',
+  path: '/painel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SouProfissionalRoute = SouProfissionalRouteImport.update({
+  id: '/sou-profissional',
+  path: '/sou-profissional',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/cadastrar-pet': typeof CadastrarPetRoute
+  '/criar-conta': typeof CriarContaRoute
+  '/entrar': typeof EntrarRoute
+  '/painel': typeof PainelRoute
+  '/sou-profissional': typeof SouProfissionalRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/cadastrar-pet': typeof CadastrarPetRoute
+  '/criar-conta': typeof CriarContaRoute
+  '/entrar': typeof EntrarRoute
+  '/painel': typeof PainelRoute
+  '/sou-profissional': typeof SouProfissionalRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/cadastrar-pet': typeof CadastrarPetRoute
+  '/criar-conta': typeof CriarContaRoute
+  '/entrar': typeof EntrarRoute
+  '/painel': typeof PainelRoute
+  '/sou-profissional': typeof SouProfissionalRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/cadastrar-pet'
+    | '/criar-conta'
+    | '/entrar'
+    | '/painel'
+    | '/sou-profissional'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/cadastrar-pet'
+    | '/criar-conta'
+    | '/entrar'
+    | '/painel'
+    | '/sou-profissional'
+  id:
+    | '__root__'
+    | '/'
+    | '/cadastrar-pet'
+    | '/criar-conta'
+    | '/entrar'
+    | '/painel'
+    | '/sou-profissional'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CadastrarPetRoute: typeof CadastrarPetRoute
+  CriarContaRoute: typeof CriarContaRoute
+  EntrarRoute: typeof EntrarRoute
+  PainelRoute: typeof PainelRoute
+  SouProfissionalRoute: typeof SouProfissionalRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +117,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cadastrar-pet': {
+      id: '/cadastrar-pet'
+      path: '/cadastrar-pet'
+      fullPath: '/cadastrar-pet'
+      preLoaderRoute: typeof CadastrarPetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/criar-conta': {
+      id: '/criar-conta'
+      path: '/criar-conta'
+      fullPath: '/criar-conta'
+      preLoaderRoute: typeof CriarContaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/entrar': {
+      id: '/entrar'
+      path: '/entrar'
+      fullPath: '/entrar'
+      preLoaderRoute: typeof EntrarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/painel': {
+      id: '/painel'
+      path: '/painel'
+      fullPath: '/painel'
+      preLoaderRoute: typeof PainelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sou-profissional': {
+      id: '/sou-profissional'
+      path: '/sou-profissional'
+      fullPath: '/sou-profissional'
+      preLoaderRoute: typeof SouProfissionalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CadastrarPetRoute: CadastrarPetRoute,
+  CriarContaRoute: CriarContaRoute,
+  EntrarRoute: EntrarRoute,
+  PainelRoute: PainelRoute,
+  SouProfissionalRoute: SouProfissionalRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

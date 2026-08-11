@@ -117,6 +117,14 @@ export const wallets = sqliteTable('wallets', {
   ...timestamps,
 })
 
+// ---- Sessions ----
+export const sessions = sqliteTable('sessions', {
+  id: id(),
+  userId: text('user_id').notNull().references(() => users.id),
+  expiresAt: text('expires_at').notNull(),
+  createdAt: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),
+})
+
 // ---- Reviews ----
 export const reviews = sqliteTable('reviews', {
   id: id(),
