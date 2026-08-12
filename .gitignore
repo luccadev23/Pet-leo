@@ -5,3 +5,4 @@ dist
 .vite
 *.log
 .env
+.dev.vars

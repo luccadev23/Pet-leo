@@ -17,13 +17,13 @@ export const Route = createFileRoute('/')({
 })
 
 const categories = [
-  { icon: PawPrint, label: 'Passeador', desc: 'Passeios individuais ou em grupo' },
-  { icon: Stethoscope, label: 'Veterinário', desc: 'Consultas e vacinação' },
-  { icon: HomeIcon, label: 'Pet Sitter', desc: 'Cuidado na casa do seu pet' },
-  { icon: Car, label: 'Transporte', desc: 'Leva e busca com segurança' },
-  { icon: Scissors, label: 'Banho e Tosa', desc: 'Higiene e estética' },
-  { icon: ShoppingBag, label: 'Pet Shop', desc: 'Produtos selecionados' },
-]
+  { icon: PawPrint, label: 'Passeador', desc: 'Passeios individuais ou em grupo', slug: 'PASSEADOR' },
+  { icon: Stethoscope, label: 'Veterinário', desc: 'Consultas e vacinação', slug: 'VETERINARIO' },
+  { icon: HomeIcon, label: 'Pet Sitter', desc: 'Cuidado na casa do seu pet', slug: 'PET_SITTER' },
+  { icon: Car, label: 'Transporte', desc: 'Leva e busca com segurança', slug: 'TRANSPORTE' },
+  { icon: Scissors, label: 'Banho e Tosa', desc: 'Higiene e estética', slug: 'BANHO_TOSA' },
+  { icon: ShoppingBag, label: 'Pet Shop', desc: 'Produtos selecionados', slug: 'PET_SHOP' },
+] as const
 
 const faturamento = [
   { ano: '2023', valor: 69.5 },
@@ -130,14 +130,16 @@ function Home() {
         <h2 className="font-display text-3xl text-petlio-navy">O que você procura hoje?</h2>
         <p className="mt-2 text-petlio-navy/60">Seis categorias, um único agendamento.</p>
         <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-          {categories.map(({ icon: Icon, label, desc }) => (
-            <Card key={label} className="group cursor-pointer p-5 transition-transform hover:-translate-y-1">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-petlio-gold/20 text-petlio-gold-dark transition-colors group-hover:bg-petlio-gold group-hover:text-petlio-navy-900">
-                <Icon className="h-6 w-6" />
-              </div>
-              <div className="mt-4 font-semibold text-petlio-navy">{label}</div>
-              <div className="mt-1 text-xs text-petlio-navy/55">{desc}</div>
-            </Card>
+          {categories.map(({ icon: Icon, label, desc, slug }) => (
+            <Link key={label} to="/servicos/$category" params={{ category: slug }}>
+              <Card className="group cursor-pointer p-5 transition-transform hover:-translate-y-1">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-petlio-gold/20 text-petlio-gold-dark transition-colors group-hover:bg-petlio-gold group-hover:text-petlio-navy-900">
+                  <Icon className="h-6 w-6" />
+                </div>
+                <div className="mt-4 font-semibold text-petlio-navy">{label}</div>
+                <div className="mt-1 text-xs text-petlio-navy/55">{desc}</div>
+              </Card>
+            </Link>
           ))}
         </div>
       </section>

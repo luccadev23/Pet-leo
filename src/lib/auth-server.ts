@@ -6,6 +6,8 @@ import * as schema from '~/db/schema'
 
 export function getAuth() {
   return betterAuth({
+    secret: env.BETTER_AUTH_SECRET,
+    baseURL: env.BETTER_AUTH_URL,
     database: drizzleAdapter(drizzle(env.DB as D1Database), {
       provider: 'sqlite',
       schema,

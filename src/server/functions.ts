@@ -1,9 +1,9 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 import { drizzle } from 'drizzle-orm/d1'
-import { eq } from 'drizzle-orm'
+import { eq, and, desc } from 'drizzle-orm'
 import { env } from 'cloudflare:workers'
-import { user, pets, providerProfiles, services } from '~/db/schema'
+import { user, pets, providerProfiles, services, bookings } from '~/db/schema'
 import { getAuth } from '~/lib/auth-server'
 
 function db() {
@@ -120,7 +120,7 @@ export const getMyPets = createServerFn({ method: 'GET' }).handler(async () => {
 export const becomeProvider = createServerFn({ method: 'POST' })
   .validator(
     (d: {
-      category: 'VETERINARIO' | 'PASSEADOR' | 'PET_SITTER' | 'TRANSPORTE' | 'PET_SHOP' | 'CLINICA'
+      category: 'VETERINARIO' | 'PASSEADOR' | 'PET_SITTER' | 'TRANSPORTE' | 'PET_SHOP' | 'BANHO_TOSA'
       bio?: string
       photoKey?: string
     }) => d
@@ -149,7 +149,7 @@ export const becomeProvider = createServerFn({ method: 'POST' })
 export const updateProviderProfile = createServerFn({ method: 'POST' })
   .validator(
     (d: {
-      category: 'VETERINARIO' | 'PASSEADOR' | 'PET_SITTER' | 'TRANSPORTE' | 'PET_SHOP' | 'CLINICA'
+      category: 'VETERINARIO' | 'PASSEADOR' | 'PET_SITTER' | 'TRANSPORTE' | 'PET_SHOP' | 'BANHO_TOSA'
       bio?: string
       photoKey?: string | null
     }) => d
@@ -175,6 +175,269 @@ export const updateProviderProfile = createServerFn({ method: 'POST' })
       await db().update(user).set({ avatarUrl: data.photoKey }).where(eq(user.id, u.id))
     }
     return { id: profile.id }
+  })
+
+export const getProvidersByCategory = createServerFn({ method: 'GET' })
+  .validator(
+    (d: {
+      category: 'VETERINARIO' | 'PASSEADOR' | 'PET_SITTER' | 'TRANSPORTE' | 'PET_SHOP' | 'BANHO_TOSA'
+    }) => d
+  )
+  .handler(async ({ data }) => {
+    const rows = await db()
+      .select({
+        id: providerProfiles.id,
+        bio: providerProfiles.bio,
+        ratingAvg: providerProfiles.ratingAvg,
+        ratingCount: providerProfiles.ratingCount,
+        verified: providerProfiles.verified,
+        name: user.name,
+        avatarUrl: user.avatarUrl,
+      })
+      .from(providerProfiles)
+      .innerJoin(user, eq(providerProfiles.userId, user.id))
+      .where(eq(providerProfiles.category, data.category))
+
+    const providers = await Promise.all(
+      rows.map(async (p) => ({
+        ...p,
+        services: await db()
+          .select()
+          .from(services)
+          .where(and(eq(services.providerId, p.id), eq(services.active, true))),
+      }))
+    )
+    return providers
+  })
+
+// ---------------- SERVICES ----------------
+
+export const createService = createServerFn({ method: 'POST' })
+  .validator(
+    (d: { name: string; description?: string; durationMinutes: number; priceCents: number }) => d
+  )
+  .handler(async ({ data }) => {
+    const u = await getCurrentUserRow()
+    if (!u) throw new Error('Você precisa entrar na sua conta primeiro.')
+    if (!data.name.trim()) throw new Error('Dê um nome para o serviço.')
+    if (data.priceCents <= 0) throw new Error('Informe um preço válido.')
+
+    const rows = await db().select().from(providerProfiles).where(eq(providerProfiles.userId, u.id))
+    const profile = rows[0]
+    if (!profile) throw new Error('Você precisa ter um perfil profissional primeiro.')
+
+    const id = crypto.randomUUID()
+    await db().insert(services).values({
+      id,
+      providerId: profile.id,
+      name: data.name.trim(),
+      description: data.description?.trim() || null,
+      durationMinutes: data.durationMinutes,
+      priceCents: data.priceCents,
+    })
+    return { id }
+  })
+
+export const updateService = createServerFn({ method: 'POST' })
+  .validator(
+    (d: {
+      id: string
+      name: string
+      description?: string
+      durationMinutes: number
+      priceCents: number
+      active: boolean
+    }) => d
+  )
+  .handler(async ({ data }) => {
+    const u = await getCurrentUserRow()
+    if (!u) throw new Error('Você precisa entrar na sua conta primeiro.')
+
+    const profileRows = await db().select().from(providerProfiles).where(eq(providerProfiles.userId, u.id))
+    const profile = profileRows[0]
+    if (!profile) throw new Error('Perfil profissional não encontrado.')
+
+    const serviceRows = await db().select().from(services).where(eq(services.id, data.id))
+    const service = serviceRows[0]
+    if (!service || service.providerId !== profile.id) throw new Error('Serviço não encontrado.')
+
+    await db()
+      .update(services)
+      .set({
+        name: data.name.trim(),
+        description: data.description?.trim() || null,
+        durationMinutes: data.durationMinutes,
+        priceCents: data.priceCents,
+        active: data.active,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(services.id, data.id))
+    return { id: data.id }
+  })
+
+export const deleteService = createServerFn({ method: 'POST' })
+  .validator((d: { id: string }) => d)
+  .handler(async ({ data }) => {
+    const u = await getCurrentUserRow()
+    if (!u) throw new Error('Você precisa entrar na sua conta primeiro.')
+
+    const profileRows = await db().select().from(providerProfiles).where(eq(providerProfiles.userId, u.id))
+    const profile = profileRows[0]
+    if (!profile) throw new Error('Perfil profissional não encontrado.')
+
+    const serviceRows = await db().select().from(services).where(eq(services.id, data.id))
+    const service = serviceRows[0]
+    if (!service || service.providerId !== profile.id) throw new Error('Serviço não encontrado.')
+
+    await db().delete(services).where(eq(services.id, data.id))
+    return { id: data.id }
+  })
+
+// ---------------- BOOKINGS ----------------
+
+export const getProviderDetail = createServerFn({ method: 'GET' })
+  .validator((d: { providerId: string }) => d)
+  .handler(async ({ data }) => {
+    const rows = await db()
+      .select({
+        id: providerProfiles.id,
+        category: providerProfiles.category,
+        bio: providerProfiles.bio,
+        ratingAvg: providerProfiles.ratingAvg,
+        ratingCount: providerProfiles.ratingCount,
+        verified: providerProfiles.verified,
+        name: user.name,
+        avatarUrl: user.avatarUrl,
+      })
+      .from(providerProfiles)
+      .innerJoin(user, eq(providerProfiles.userId, user.id))
+      .where(eq(providerProfiles.id, data.providerId))
+    const provider = rows[0]
+    if (!provider) throw new Error('Profissional não encontrado.')
+
+    const providerServices = await db()
+      .select()
+      .from(services)
+      .where(and(eq(services.providerId, provider.id), eq(services.active, true)))
+
+    return { ...provider, services: providerServices }
+  })
+
+export const createBooking = createServerFn({ method: 'POST' })
+  .validator(
+    (d: { providerId: string; serviceId: string; petId: string; scheduledAt: string; notes?: string }) => d
+  )
+  .handler(async ({ data }) => {
+    const u = await getCurrentUserRow()
+    if (!u) throw new Error('Você precisa entrar na sua conta primeiro.')
+
+    const petRows = await db().select().from(pets).where(eq(pets.id, data.petId))
+    const pet = petRows[0]
+    if (!pet || pet.ownerId !== u.id) throw new Error('Pet não encontrado.')
+
+    const serviceRows = await db().select().from(services).where(eq(services.id, data.serviceId))
+    const service = serviceRows[0]
+    if (!service || service.providerId !== data.providerId || !service.active) {
+      throw new Error('Serviço não encontrado.')
+    }
+
+    if (!data.scheduledAt) throw new Error('Escolha uma data e horário.')
+    if (new Date(data.scheduledAt).getTime() < Date.now()) {
+      throw new Error('Escolha uma data e horário futuros.')
+    }
+
+    const id = crypto.randomUUID()
+    await db().insert(bookings).values({
+      id,
+      clientId: u.id,
+      petId: data.petId,
+      providerId: data.providerId,
+      serviceId: data.serviceId,
+      scheduledAt: data.scheduledAt,
+      priceCents: service.priceCents,
+      notes: data.notes?.trim() || null,
+    })
+    return { id }
+  })
+
+export const getMyBookings = createServerFn({ method: 'GET' }).handler(async () => {
+  const u = await getCurrentUserRow()
+  if (!u) return []
+
+  const rows = await db()
+    .select({
+      id: bookings.id,
+      scheduledAt: bookings.scheduledAt,
+      status: bookings.status,
+      priceCents: bookings.priceCents,
+      createdAt: bookings.createdAt,
+      petName: pets.name,
+      serviceName: services.name,
+      providerId: providerProfiles.id,
+      providerName: user.name,
+    })
+    .from(bookings)
+    .innerJoin(pets, eq(bookings.petId, pets.id))
+    .innerJoin(services, eq(bookings.serviceId, services.id))
+    .innerJoin(providerProfiles, eq(bookings.providerId, providerProfiles.id))
+    .innerJoin(user, eq(providerProfiles.userId, user.id))
+    .where(eq(bookings.clientId, u.id))
+    .orderBy(desc(bookings.scheduledAt))
+
+  return rows
+})
+
+export const getReceivedBookings = createServerFn({ method: 'GET' }).handler(async () => {
+  const u = await getCurrentUserRow()
+  if (!u) return []
+
+  const profileRows = await db().select().from(providerProfiles).where(eq(providerProfiles.userId, u.id))
+  const profile = profileRows[0]
+  if (!profile) return []
+
+  const rows = await db()
+    .select({
+      id: bookings.id,
+      scheduledAt: bookings.scheduledAt,
+      status: bookings.status,
+      priceCents: bookings.priceCents,
+      createdAt: bookings.createdAt,
+      petName: pets.name,
+      serviceName: services.name,
+      clientName: user.name,
+    })
+    .from(bookings)
+    .innerJoin(pets, eq(bookings.petId, pets.id))
+    .innerJoin(services, eq(bookings.serviceId, services.id))
+    .innerJoin(user, eq(bookings.clientId, user.id))
+    .where(eq(bookings.providerId, profile.id))
+    .orderBy(desc(bookings.scheduledAt))
+
+  return rows
+})
+
+export const updateBookingStatus = createServerFn({ method: 'POST' })
+  .validator((d: { id: string; status: 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' }) => d)
+  .handler(async ({ data }) => {
+    const u = await getCurrentUserRow()
+    if (!u) throw new Error('Você precisa entrar na sua conta primeiro.')
+
+    const rows = await db().select().from(bookings).where(eq(bookings.id, data.id))
+    const booking = rows[0]
+    if (!booking) throw new Error('Agendamento não encontrado.')
+
+    const profileRows = await db().select().from(providerProfiles).where(eq(providerProfiles.userId, u.id))
+    const profile = profileRows[0]
+    const isProvider = profile && booking.providerId === profile.id
+    const isClient = booking.clientId === u.id
+    if (!isProvider && !isClient) throw new Error('Você não tem acesso a este agendamento.')
+    if (data.status !== 'CANCELLED' && !isProvider) throw new Error('Somente o profissional pode confirmar ou concluir.')
+
+    await db()
+      .update(bookings)
+      .set({ status: data.status, updatedAt: new Date().toISOString() })
+      .where(eq(bookings.id, data.id))
+    return { id: data.id }
   })
 
 // ---------------- DASHBOARD ----------------

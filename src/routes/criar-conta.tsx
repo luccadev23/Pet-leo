@@ -7,11 +7,15 @@ import { Input, Label } from '~/components/ui/form'
 import { authClient } from '~/lib/auth-client'
 
 export const Route = createFileRoute('/criar-conta')({
+  validateSearch: (search: Record<string, unknown>): { from?: string } => ({
+    from: typeof search.from === 'string' ? search.from : undefined,
+  }),
   component: CriarConta,
 })
 
 function CriarConta() {
   const navigate = useNavigate()
+  const { from } = Route.useSearch()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -28,7 +32,7 @@ function CriarConta() {
       setError(authError.message ?? 'Não foi possível criar sua conta.')
       return
     }
-    navigate({ to: '/painel' })
+    navigate({ to: from || '/painel' } as any)
   }
 
   return (
@@ -64,7 +68,7 @@ function CriarConta() {
         </form>
 
         <p className="mt-6 text-center text-sm text-petlio-navy/60">
-          Já tem conta? <Link to="/entrar" className="font-semibold text-petlio-teal-600 hover:underline">Entrar</Link>
+          Já tem conta? <Link to="/entrar" search={{ from }} className="font-semibold text-petlio-teal-600 hover:underline">Entrar</Link>
         </p>
         <p className="mt-2 text-center text-sm text-petlio-navy/60">
           É um profissional? <Link to="/sou-profissional" className="font-semibold text-petlio-teal-600 hover:underline">Cadastre seus serviços</Link>

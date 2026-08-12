@@ -8,6 +8,20 @@
       "when": 1786446544336,
       "tag": "0000_bright_magik",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1786578000000,
+      "tag": "0001_fix_user_fk",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1786578100000,
+      "tag": "0002_add_booking_notes",
+      "breakpoints": true
     }
   ]
 }

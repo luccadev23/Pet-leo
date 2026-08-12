@@ -1,11 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { env } from 'cloudflare:workers'
 
-export const Route = createFileRoute('/api/img/$key')({
+export const Route = createFileRoute('/api/img/$')({
   server: {
     handlers: {
       GET: async ({ params }) => {
-        const object = await (env.IMAGES as R2Bucket).get(params.key)
+        const object = await (env.IMAGES as R2Bucket).get(params._splat!)
         if (!object) {
           return new Response('Not found', { status: 404 })
         }

@@ -22,7 +22,7 @@ const categories = [
   { value: 'PET_SITTER', label: 'Pet Sitter' },
   { value: 'TRANSPORTE', label: 'Transporte' },
   { value: 'PET_SHOP', label: 'Pet Shop' },
-  { value: 'CLINICA', label: 'Clínica' },
+  { value: 'BANHO_TOSA', label: 'Banho e Tosa' },
 ] as const
 
 function SouProfissional() {

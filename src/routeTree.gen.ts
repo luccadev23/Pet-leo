@@ -15,10 +15,12 @@ import { Route as CriarContaRouteImport } from './routes/criar-conta'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as PainelRouteImport } from './routes/painel'
 import { Route as SouProfissionalRouteImport } from './routes/sou-profissional'
+import { Route as AgendarProviderIdRouteImport } from './routes/agendar/$providerId'
 import { Route as ApiUploadRouteImport } from './routes/api/upload'
 import { Route as EditarPetPetIdRouteImport } from './routes/editar-pet/$petId'
+import { Route as ServicosCategoryRouteImport } from './routes/servicos/$category'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as ApiImgKeyRouteImport } from './routes/api/img/$key'
+import { Route as ApiImgSplatRouteImport } from './routes/api/img/$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -50,6 +52,11 @@ const SouProfissionalRoute = SouProfissionalRouteImport.update({
   path: '/sou-profissional',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AgendarProviderIdRoute = AgendarProviderIdRouteImport.update({
+  id: '/agendar/$providerId',
+  path: '/agendar/$providerId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiUploadRoute = ApiUploadRouteImport.update({
   id: '/api/upload',
   path: '/api/upload',
@@ -60,14 +67,19 @@ const EditarPetPetIdRoute = EditarPetPetIdRouteImport.update({
   path: '/editar-pet/$petId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ServicosCategoryRoute = ServicosCategoryRouteImport.update({
+  id: '/servicos/$category',
+  path: '/servicos/$category',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiImgKeyRoute = ApiImgKeyRouteImport.update({
-  id: '/api/img/$key',
-  path: '/api/img/$key',
+const ApiImgSplatRoute = ApiImgSplatRouteImport.update({
+  id: '/api/img/$',
+  path: '/api/img/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -78,10 +90,12 @@ export interface FileRoutesByFullPath {
   '/entrar': typeof EntrarRoute
   '/painel': typeof PainelRoute
   '/sou-profissional': typeof SouProfissionalRoute
+  '/agendar/$providerId': typeof AgendarProviderIdRoute
   '/api/upload': typeof ApiUploadRoute
   '/editar-pet/$petId': typeof EditarPetPetIdRoute
+  '/servicos/$category': typeof ServicosCategoryRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/img/$key': typeof ApiImgKeyRoute
+  '/api/img/$': typeof ApiImgSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -90,10 +104,12 @@ export interface FileRoutesByTo {
   '/entrar': typeof EntrarRoute
   '/painel': typeof PainelRoute
   '/sou-profissional': typeof SouProfissionalRoute
+  '/agendar/$providerId': typeof AgendarProviderIdRoute
   '/api/upload': typeof ApiUploadRoute
   '/editar-pet/$petId': typeof EditarPetPetIdRoute
+  '/servicos/$category': typeof ServicosCategoryRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/img/$key': typeof ApiImgKeyRoute
+  '/api/img/$': typeof ApiImgSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -103,10 +119,12 @@ export interface FileRoutesById {
   '/entrar': typeof EntrarRoute
   '/painel': typeof PainelRoute
   '/sou-profissional': typeof SouProfissionalRoute
+  '/agendar/$providerId': typeof AgendarProviderIdRoute
   '/api/upload': typeof ApiUploadRoute
   '/editar-pet/$petId': typeof EditarPetPetIdRoute
+  '/servicos/$category': typeof ServicosCategoryRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/api/img/$key': typeof ApiImgKeyRoute
+  '/api/img/$': typeof ApiImgSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -117,10 +135,12 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/painel'
     | '/sou-profissional'
+    | '/agendar/$providerId'
     | '/api/upload'
     | '/editar-pet/$petId'
+    | '/servicos/$category'
     | '/api/auth/$'
-    | '/api/img/$key'
+    | '/api/img/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -129,10 +149,12 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/painel'
     | '/sou-profissional'
+    | '/agendar/$providerId'
     | '/api/upload'
     | '/editar-pet/$petId'
+    | '/servicos/$category'
     | '/api/auth/$'
-    | '/api/img/$key'
+    | '/api/img/$'
   id:
     | '__root__'
     | '/'
@@ -141,10 +163,12 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/painel'
     | '/sou-profissional'
+    | '/agendar/$providerId'
     | '/api/upload'
     | '/editar-pet/$petId'
+    | '/servicos/$category'
     | '/api/auth/$'
-    | '/api/img/$key'
+    | '/api/img/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -154,10 +178,12 @@ export interface RootRouteChildren {
   EntrarRoute: typeof EntrarRoute
   PainelRoute: typeof PainelRoute
   SouProfissionalRoute: typeof SouProfissionalRoute
+  AgendarProviderIdRoute: typeof AgendarProviderIdRoute
   ApiUploadRoute: typeof ApiUploadRoute
   EditarPetPetIdRoute: typeof EditarPetPetIdRoute
+  ServicosCategoryRoute: typeof ServicosCategoryRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
-  ApiImgKeyRoute: typeof ApiImgKeyRoute
+  ApiImgSplatRoute: typeof ApiImgSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -204,6 +230,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SouProfissionalRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/agendar/$providerId': {
+      id: '/agendar/$providerId'
+      path: '/agendar/$providerId'
+      fullPath: '/agendar/$providerId'
+      preLoaderRoute: typeof AgendarProviderIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/upload': {
       id: '/api/upload'
       path: '/api/upload'
@@ -218,6 +251,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EditarPetPetIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/servicos/$category': {
+      id: '/servicos/$category'
+      path: '/servicos/$category'
+      fullPath: '/servicos/$category'
+      preLoaderRoute: typeof ServicosCategoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -225,11 +265,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/img/$key': {
-      id: '/api/img/$key'
-      path: '/api/img/$key'
-      fullPath: '/api/img/$key'
-      preLoaderRoute: typeof ApiImgKeyRouteImport
+    '/api/img/$': {
+      id: '/api/img/$'
+      path: '/api/img/$'
+      fullPath: '/api/img/$'
+      preLoaderRoute: typeof ApiImgSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -242,10 +282,12 @@ const rootRouteChildren: RootRouteChildren = {
   EntrarRoute: EntrarRoute,
   PainelRoute: PainelRoute,
   SouProfissionalRoute: SouProfissionalRoute,
+  AgendarProviderIdRoute: AgendarProviderIdRoute,
   ApiUploadRoute: ApiUploadRoute,
   EditarPetPetIdRoute: EditarPetPetIdRoute,
+  ServicosCategoryRoute: ServicosCategoryRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
-  ApiImgKeyRoute: ApiImgKeyRoute,
+  ApiImgSplatRoute: ApiImgSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

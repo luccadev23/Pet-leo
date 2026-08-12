@@ -6,11 +6,15 @@ import { Input, Label } from '~/components/ui/form'
 import { authClient } from '~/lib/auth-client'
 
 export const Route = createFileRoute('/entrar')({
+  validateSearch: (search: Record<string, unknown>): { from?: string } => ({
+    from: typeof search.from === 'string' ? search.from : undefined,
+  }),
   component: Entrar,
 })
 
 function Entrar() {
   const navigate = useNavigate()
+  const { from } = Route.useSearch()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -26,7 +30,7 @@ function Entrar() {
       setError('E-mail ou senha incorretos.')
       return
     }
-    navigate({ to: '/painel' })
+    navigate({ to: from || '/painel' } as any)
   }
 
   return (
@@ -55,7 +59,7 @@ function Entrar() {
         </form>
 
         <p className="mt-6 text-center text-sm text-petlio-navy/60">
-          Ainda não tem conta? <Link to="/criar-conta" className="font-semibold text-petlio-teal-600 hover:underline">Criar conta</Link>
+          Ainda não tem conta? <Link to="/criar-conta" search={{ from }} className="font-semibold text-petlio-teal-600 hover:underline">Criar conta</Link>
         </p>
       </Card>
     </main>

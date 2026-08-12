@@ -87,7 +87,7 @@ export const providerProfiles = sqliteTable('provider_profiles', {
   id: id(),
   userId: text('user_id').notNull().references(() => user.id).unique(),
   category: text('category', {
-    enum: ['VETERINARIO', 'PASSEADOR', 'PET_SITTER', 'TRANSPORTE', 'PET_SHOP', 'CLINICA'],
+    enum: ['VETERINARIO', 'PASSEADOR', 'PET_SITTER', 'TRANSPORTE', 'PET_SHOP', 'BANHO_TOSA'],
   }).notNull(),
   bio: text('bio'),
   ratingAvg: real('rating_avg').default(0),
@@ -122,6 +122,7 @@ export const bookings = sqliteTable('bookings', {
     .notNull()
     .default('PENDING'),
   priceCents: integer('price_cents').notNull(),
+  notes: text('notes'),
   ...timestamps,
 })
 

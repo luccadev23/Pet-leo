@@ -8,10 +8,13 @@ import { ImageUploadField } from '~/components/image-upload-field'
 import { createPet, getSessionUser } from '~/server/functions'
 
 export const Route = createFileRoute('/cadastrar-pet')({
-  beforeLoad: async () => {
+  validateSearch: (search: Record<string, unknown>): { from?: string } => ({
+    from: typeof search.from === 'string' ? search.from : undefined,
+  }),
+  beforeLoad: async ({ location }) => {
     const user = await getSessionUser()
     if (!user) {
-      throw redirect({ to: '/entrar' })
+      throw redirect({ to: '/entrar', search: { from: location.href } as any })
     }
   },
   component: CadastrarPet,
@@ -19,6 +22,7 @@ export const Route = createFileRoute('/cadastrar-pet')({
 
 function CadastrarPet() {
   const navigate = useNavigate()
+  const { from } = Route.useSearch()
   const [name, setName] = useState('')
   const [species, setSpecies] = useState('Cachorro')
   const [breed, setBreed] = useState('')
@@ -47,7 +51,7 @@ function CadastrarPet() {
           photoKey: photoKey || undefined,
         },
       })
-      navigate({ to: '/painel' })
+      navigate({ to: from || '/painel' } as any)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Não foi possível cadastrar o pet.')
     } finally {

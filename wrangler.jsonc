@@ -7,11 +7,15 @@
   "observability": {
     "enabled": true
   },
+  "vars": {
+    "BETTER_AUTH_URL": "https://pet-leo.lucca-dev23.workers.dev"
+  },
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "petlio-db",
-      "database_id": "7a552534-5da1-4e8c-82b5-280109ac6b6f"
+      "database_id": "7a552534-5da1-4e8c-82b5-280109ac6b6f",
+      "migrations_dir": "drizzle"
     }
   ],
   "r2_buckets": [
